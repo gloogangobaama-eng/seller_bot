@@ -217,3 +217,4 @@ Username: @username
 
 **Dev proxy errors**
 → Make sure you're running `netlify dev` from the `frontend/` directory, not the root
+# seller_bot
