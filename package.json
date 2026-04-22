@@ -6,5 +6,8 @@
     "dev": "cd frontend && npm install && npx netlify dev",
     "build": "cd frontend && npm install && npm run build",
     "install:all": "cd frontend && npm install && cd ../netlify/functions && npm install"
+  },
+  "dependencies": {
+    "busboy": "^1.6.0"
   }
 }
