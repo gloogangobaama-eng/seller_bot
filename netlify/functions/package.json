@@ -1,0 +1,8 @@
+{
+  "name": "supplier-verification-functions",
+  "version": "1.0.0",
+  "description": "Netlify functions for supplier verification Telegram app",
+  "dependencies": {
+    "busboy": "^1.6.0"
+  }
+}

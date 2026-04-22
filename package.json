@@ -1,0 +1,10 @@
+{
+  "name": "supplier-verification-telegram-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && npm install && npx netlify dev",
+    "build": "cd frontend && npm install && npm run build",
+    "install:all": "cd frontend && npm install && cd ../netlify/functions && npm install"
+  }
+}
