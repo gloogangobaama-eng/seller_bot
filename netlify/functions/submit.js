@@ -259,7 +259,7 @@ exports.handler = async (event) => {
     }
   }
 
-  const BOT_TOKEN = "8600815791:AAF8ukbxRvKag51tvU5tW7GfQ_OqZiN5KWQ"
+  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
   if (!BOT_TOKEN) {
     console.error('TELEGRAM_BOT_TOKEN is not set')
     return { statusCode: 500, body: 'Server configuration error: missing bot token' }

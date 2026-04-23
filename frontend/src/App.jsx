@@ -263,8 +263,9 @@ const initialFormData = {
   step4: { files: [], comment: '' },
 }
 
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
-const MAX_UPLOAD_MB = 5
+const MAX_PHOTO_BYTES = 10 * 1024 * 1024
+const MAX_FILE_BYTES = 50 * 1024 * 1024
+const MAX_TOTAL_UPLOAD_BYTES = 90 * 1024 * 1024
 
 export default function App() {
   const { tgUser, closeApp } = useTelegram()
@@ -290,14 +291,18 @@ export default function App() {
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
-      const oversized = formData.step4.files.find((file) => file.size > MAX_UPLOAD_BYTES)
+      const oversized = formData.step4.files.find((file) => {
+        const limit = file.type.startsWith('image/') ? MAX_PHOTO_BYTES : MAX_FILE_BYTES
+        return file.size > limit
+      })
       if (oversized) {
-        throw new Error(`Файл "${oversized.name}" больше ${MAX_UPLOAD_MB} MB. Сожмите видео или выберите файл поменьше.`)
+        const limitMb = oversized.type.startsWith('image/') ? 10 : 50
+        throw new Error(`Файл "${oversized.name}" больше ${limitMb} MB. Сожмите его или выберите файл поменьше.`)
       }
 
       const totalSize = formData.step4.files.reduce((sum, file) => sum + file.size, 0)
-      if (totalSize > MAX_UPLOAD_BYTES) {
-        throw new Error(`Общий размер файлов больше ${MAX_UPLOAD_MB} MB. Оставьте меньше файлов или сожмите видео.`)
+      if (totalSize > MAX_TOTAL_UPLOAD_BYTES) {
+        throw new Error('Общий размер файлов больше 90 MB. Оставьте меньше файлов или сожмите видео.')
       }
 
       const fd = new FormData()
@@ -317,7 +322,7 @@ export default function App() {
       }
       fd.append('data', JSON.stringify(payload))
 
-      const res = await fetch('/.netlify/functions/submit', {
+      const res = await fetch('/api/submit', {
         method: 'POST',
         body: fd,
       })

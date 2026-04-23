@@ -1,8 +1,17 @@
 import React, { useState, useRef } from 'react'
 import CommentModal from './CommentModal'
 
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
-const MAX_UPLOAD_MB = 5
+const MAX_PHOTO_BYTES = 10 * 1024 * 1024
+const MAX_FILE_BYTES = 50 * 1024 * 1024
+const MAX_TOTAL_UPLOAD_BYTES = 90 * 1024 * 1024
+
+function getFileLimit(file) {
+  return file.type.startsWith('image/') ? MAX_PHOTO_BYTES : MAX_FILE_BYTES
+}
+
+function getFileLimitMb(file) {
+  return file.type.startsWith('image/') ? 10 : 50
+}
 
 export default function Step4({ data, onUpdate, onSubmit, isSubmitting }) {
   const [showModal, setShowModal] = useState(false)
@@ -14,9 +23,9 @@ export default function Step4({ data, onUpdate, onSubmit, isSubmitting }) {
     const newFiles = Array.from(e.target.files)
     if (newFiles.length === 0) return
 
-    const oversized = newFiles.find((file) => file.size > MAX_UPLOAD_BYTES)
+    const oversized = newFiles.find((file) => file.size > getFileLimit(file))
     if (oversized) {
-      setError(`Файл "${oversized.name}" больше ${MAX_UPLOAD_MB} MB. Сожмите видео или выберите файл поменьше.`)
+      setError(`Файл "${oversized.name}" больше ${getFileLimitMb(oversized)} MB. Сожмите его или выберите файл поменьше.`)
       e.target.value = ''
       return
     }
@@ -27,8 +36,8 @@ export default function Step4({ data, onUpdate, onSubmit, isSubmitting }) {
       (f, i, arr) => arr.findIndex((x) => x.name === f.name && x.size === f.size) === i
     )
     const totalSize = unique.reduce((sum, file) => sum + file.size, 0)
-    if (totalSize > MAX_UPLOAD_BYTES) {
-      setError(`Общий размер файлов больше ${MAX_UPLOAD_MB} MB. Оставьте меньше файлов или сожмите видео.`)
+    if (totalSize > MAX_TOTAL_UPLOAD_BYTES) {
+      setError('Общий размер файлов больше 90 MB. Оставьте меньше файлов или сожмите видео.')
       e.target.value = ''
       return
     }
@@ -50,14 +59,14 @@ export default function Step4({ data, onUpdate, onSubmit, isSubmitting }) {
       setError('Необходимо загрузить хотя бы один файл')
       return
     }
-    const oversized = files.find((file) => file.size > MAX_UPLOAD_BYTES)
+    const oversized = files.find((file) => file.size > getFileLimit(file))
     if (oversized) {
-      setError(`Файл "${oversized.name}" больше ${MAX_UPLOAD_MB} MB. Сожмите видео или выберите файл поменьше.`)
+      setError(`Файл "${oversized.name}" больше ${getFileLimitMb(oversized)} MB. Сожмите его или выберите файл поменьше.`)
       return
     }
     const totalSize = files.reduce((sum, file) => sum + file.size, 0)
-    if (totalSize > MAX_UPLOAD_BYTES) {
-      setError(`Общий размер файлов больше ${MAX_UPLOAD_MB} MB. Оставьте меньше файлов или сожмите видео.`)
+    if (totalSize > MAX_TOTAL_UPLOAD_BYTES) {
+      setError('Общий размер файлов больше 90 MB. Оставьте меньше файлов или сожмите видео.')
       return
     }
     onSubmit()
@@ -173,7 +182,7 @@ export default function Step4({ data, onUpdate, onSubmit, isSubmitting }) {
             </div>
             <div className="text-center">
               <p className="font-sans text-sm text-nude/80">Нажмите чтобы выбрать файлы</p>
-              <p className="font-mono text-xs text-nude-muted mt-1">Фото или видео · До 5 MB всего</p>
+              <p className="font-mono text-xs text-nude-muted mt-1">Фото до 10 MB · Видео до 50 MB</p>
             </div>
           </div>
         </div>

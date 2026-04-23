@@ -3,12 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "cd frontend && npm install && npx netlify dev",
+    "dev": "cd frontend && npm install && npm run dev",
+    "dev:cloudflare": "npm run build && npx wrangler pages dev dist",
     "build": "cd frontend && npm install && npm run build",
-    "install:all": "cd frontend && npm install && cd ../netlify/functions && npm install"
-  },
-  "dependencies": {
-    "busboy": "^1.6.0",
-    "form-data": "^4.0.5"
+    "install:all": "cd frontend && npm install"
   }
 }
