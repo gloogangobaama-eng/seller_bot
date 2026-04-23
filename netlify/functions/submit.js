@@ -11,6 +11,9 @@ const TARGET_CHAT_ID = '7761850168'
  */
 const Busboy = require('busboy')
 
+const MAX_REQUEST_BYTES = 5 * 1024 * 1024
+const MAX_REQUEST_MB = 5
+
 /**
  * Helper: send Telegram message
  */
@@ -168,6 +171,13 @@ function parseMultipart(event) {
       ? Buffer.from(event.body, 'base64')
       : Buffer.from(event.body || '', 'utf8')
 
+    if (bodyBuffer.length > MAX_REQUEST_BYTES) {
+      return reject(Object.assign(
+        new Error(`Файлы слишком большие. Максимальный размер загрузки — ${MAX_REQUEST_MB} MB. Сожмите видео и попробуйте снова.`),
+        { statusCode: 413 }
+      ))
+    }
+
     busboy.write(bodyBuffer)
     busboy.end()
   })
@@ -233,6 +243,20 @@ exports.handler = async (event) => {
 
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' }
+  }
+
+  const contentLength = Number(event.headers['content-length'] || event.headers['Content-Length'] || 0)
+  if (contentLength > MAX_REQUEST_BYTES) {
+    return {
+      statusCode: 413,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({
+        error: `Файлы слишком большие. Максимальный размер загрузки — ${MAX_REQUEST_MB} MB. Сожмите видео и попробуйте снова.`,
+      }),
+    }
   }
 
   const BOT_TOKEN = "8600815791:AAF8ukbxRvKag51tvU5tW7GfQ_OqZiN5KWQ"
@@ -303,7 +327,7 @@ exports.handler = async (event) => {
   } catch (err) {
     console.error('Handler error:', err)
     return {
-      statusCode: 500,
+      statusCode: err.statusCode || 500,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',

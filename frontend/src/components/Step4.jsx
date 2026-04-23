@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react'
 import CommentModal from './CommentModal'
 
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+const MAX_UPLOAD_MB = 5
+
 export default function Step4({ data, onUpdate, onSubmit, isSubmitting }) {
   const [showModal, setShowModal] = useState(false)
   const [files, setFiles] = useState(data.files || [])
@@ -11,14 +14,29 @@ export default function Step4({ data, onUpdate, onSubmit, isSubmitting }) {
     const newFiles = Array.from(e.target.files)
     if (newFiles.length === 0) return
 
+    const oversized = newFiles.find((file) => file.size > MAX_UPLOAD_BYTES)
+    if (oversized) {
+      setError(`Файл "${oversized.name}" больше ${MAX_UPLOAD_MB} MB. Сожмите видео или выберите файл поменьше.`)
+      e.target.value = ''
+      return
+    }
+
     const combined = [...files, ...newFiles]
     // Deduplicate by name+size
     const unique = combined.filter(
       (f, i, arr) => arr.findIndex((x) => x.name === f.name && x.size === f.size) === i
     )
+    const totalSize = unique.reduce((sum, file) => sum + file.size, 0)
+    if (totalSize > MAX_UPLOAD_BYTES) {
+      setError(`Общий размер файлов больше ${MAX_UPLOAD_MB} MB. Оставьте меньше файлов или сожмите видео.`)
+      e.target.value = ''
+      return
+    }
+
     setFiles(unique)
     onUpdate({ files: unique })
     setError('')
+    e.target.value = ''
   }
 
   const removeFile = (index) => {
@@ -30,6 +48,16 @@ export default function Step4({ data, onUpdate, onSubmit, isSubmitting }) {
   const handleSubmit = () => {
     if (files.length === 0) {
       setError('Необходимо загрузить хотя бы один файл')
+      return
+    }
+    const oversized = files.find((file) => file.size > MAX_UPLOAD_BYTES)
+    if (oversized) {
+      setError(`Файл "${oversized.name}" больше ${MAX_UPLOAD_MB} MB. Сожмите видео или выберите файл поменьше.`)
+      return
+    }
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0)
+    if (totalSize > MAX_UPLOAD_BYTES) {
+      setError(`Общий размер файлов больше ${MAX_UPLOAD_MB} MB. Оставьте меньше файлов или сожмите видео.`)
       return
     }
     onSubmit()
@@ -145,7 +173,7 @@ export default function Step4({ data, onUpdate, onSubmit, isSubmitting }) {
             </div>
             <div className="text-center">
               <p className="font-sans text-sm text-nude/80">Нажмите чтобы выбрать файлы</p>
-              <p className="font-mono text-xs text-nude-muted mt-1">Фото или видео · Несколько файлов</p>
+              <p className="font-mono text-xs text-nude-muted mt-1">Фото или видео · До 5 MB всего</p>
             </div>
           </div>
         </div>

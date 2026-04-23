@@ -263,6 +263,9 @@ const initialFormData = {
   step4: { files: [], comment: '' },
 }
 
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+const MAX_UPLOAD_MB = 5
+
 export default function App() {
   const { tgUser, closeApp } = useTelegram()
   const [screen, setScreen] = useState(SCREENS.LANDING)
@@ -287,6 +290,16 @@ export default function App() {
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
+      const oversized = formData.step4.files.find((file) => file.size > MAX_UPLOAD_BYTES)
+      if (oversized) {
+        throw new Error(`Файл "${oversized.name}" больше ${MAX_UPLOAD_MB} MB. Сожмите видео или выберите файл поменьше.`)
+      }
+
+      const totalSize = formData.step4.files.reduce((sum, file) => sum + file.size, 0)
+      if (totalSize > MAX_UPLOAD_BYTES) {
+        throw new Error(`Общий размер файлов больше ${MAX_UPLOAD_MB} MB. Оставьте меньше файлов или сожмите видео.`)
+      }
+
       const fd = new FormData()
 
       // Append files
@@ -311,7 +324,18 @@ export default function App() {
 
       if (!res.ok) {
         const errText = await res.text()
-        throw new Error(errText || `HTTP ${res.status}`)
+        let message = errText || `HTTP ${res.status}`
+
+        try {
+          const json = JSON.parse(errText)
+          message = json.error || message
+        } catch {
+          if (errText.includes('Internal Error')) {
+            message = 'Видео слишком большое или сервер не смог обработать загрузку. Сожмите видео и попробуйте снова.'
+          }
+        }
+
+        throw new Error(message)
       }
 
       setScreen(SCREENS.SUCCESS)
