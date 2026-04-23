@@ -50,6 +50,18 @@ TELEGRAM_BOT_TOKEN=your_bot_token
 https://your-project.pages.dev
 ```
 
+To make the bot reply to `/start`, set a Telegram webhook to:
+
+```text
+https://your-domain/api/telegram-webhook
+```
+
+Optional environment variable:
+
+```text
+PUBLIC_WEB_APP_URL=https://your-domain
+```
+
 ## Local Development
 
 Frontend only:
