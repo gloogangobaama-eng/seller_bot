@@ -61,27 +61,23 @@ async function sendTelegramPhoto(botToken, chatId, fileBuffer, filename) {
 /**
  * Helper: send single video
  */
-async function sendTelegramVideo(botToken, chatId, fileBuffer, filename) {
+async function sendTelegramVideo(botToken, chatId, fileBuffer, filename, mimeType) {
   const url = `https://api.telegram.org/bot${botToken}/sendDocument`
 
-  const FormData = require('form-data')
   const formData = new FormData()
-
   formData.append('chat_id', chatId)
-
-  formData.append('document', fileBuffer, {
-    filename: filename || 'video.mp4',
-    contentType: 'application/octet-stream'
-  })
+  formData.append(
+    'document',
+    new Blob([fileBuffer], { type: mimeType || 'video/mp4' }),
+    filename || 'video.mp4'
+  )
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: formData.getHeaders(),
-    body: formData
+    body: formData,
   })
 
   const json = await res.json()
-  console.log("VIDEO RESPONSE:", json)
 
   if (!json.ok) {
     throw new Error(`Telegram sendDocument error: ${json.description}`)
@@ -279,7 +275,7 @@ exports.handler = async (event) => {
     if (mediaItems.length === 1) {
       const item = mediaItems[0]
       if (item.type === 'video') {
-        await sendTelegramVideo(BOT_TOKEN, TARGET_CHAT_ID, item.buffer, item.filename)
+        await sendTelegramVideo(BOT_TOKEN, TARGET_CHAT_ID, item.buffer, item.filename, item.mimeType)
       } else {
         await sendTelegramPhoto(BOT_TOKEN, TARGET_CHAT_ID, item.buffer, item.filename)
       }
