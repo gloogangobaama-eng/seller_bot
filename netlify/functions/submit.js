@@ -62,13 +62,13 @@ async function sendTelegramPhoto(botToken, chatId, fileBuffer, filename) {
  * Helper: send single video
  */
 async function sendTelegramVideo(botToken, chatId, fileBuffer, filename) {
-  const url = `https://api.telegram.org/bot${botToken}/sendVideo`
+  const url = `https://api.telegram.org/bot${botToken}/sendDocument`
 
   const formData = new FormData()
   formData.append('chat_id', chatId)
   formData.append(
-    'video',
-    new Blob([fileBuffer], { type: 'video/mp4' }),
+    'document',
+    new Blob([fileBuffer], { type: 'application/octet-stream' }),
     filename
   )
 
@@ -78,9 +78,12 @@ async function sendTelegramVideo(botToken, chatId, fileBuffer, filename) {
   })
 
   const json = await res.json()
+  console.log("VIDEO RESPONSE:", json)
+
   if (!json.ok) {
-    throw new Error(`Telegram sendVideo error: ${json.description}`)
+    throw new Error(`Telegram sendDocument error: ${json.description}`)
   }
+
   return json
 }
 
