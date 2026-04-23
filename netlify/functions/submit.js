@@ -64,17 +64,20 @@ async function sendTelegramPhoto(botToken, chatId, fileBuffer, filename) {
 async function sendTelegramVideo(botToken, chatId, fileBuffer, filename) {
   const url = `https://api.telegram.org/bot${botToken}/sendDocument`
 
+  const FormData = require('form-data')
   const formData = new FormData()
+
   formData.append('chat_id', chatId)
-  formData.append(
-    'document',
-    new Blob([fileBuffer], { type: 'application/octet-stream' }),
-    filename
-  )
+
+  formData.append('document', fileBuffer, {
+    filename: filename || 'video.mp4',
+    contentType: 'application/octet-stream'
+  })
 
   const res = await fetch(url, {
     method: 'POST',
-    body: formData,
+    headers: formData.getHeaders(),
+    body: formData
   })
 
   const json = await res.json()
