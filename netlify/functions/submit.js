@@ -45,14 +45,12 @@ async function sendTelegramPhoto(botToken, chatId, fileBuffer, filename) {
     new Blob([fileBuffer], { type: 'image/jpeg' }),
     filename
   )
-    filename: filename,
-    contentType: 'image/jpeg'
-  })
 
   const res = await fetch(url, {
     method: 'POST',
     body: formData,
   })
+
   const json = await res.json()
   if (!json.ok) {
     throw new Error(`Telegram sendPhoto error: ${json.description}`)
@@ -73,14 +71,12 @@ async function sendTelegramVideo(botToken, chatId, fileBuffer, filename) {
     new Blob([fileBuffer], { type: 'video/mp4' }),
     filename
   )
-    filename: filename,
-    contentType: 'video/mp4'
-  })
 
   const res = await fetch(url, {
     method: 'POST',
     body: formData,
   })
+
   const json = await res.json()
   if (!json.ok) {
     throw new Error(`Telegram sendVideo error: ${json.description}`)
@@ -98,18 +94,18 @@ async function sendTelegramMediaGroup(botToken, chatId, mediaItems) {
   formData.append('chat_id', chatId)
 
   const mediaJson = []
+
   mediaItems.forEach((item, i) => {
     const attachName = `attach_${i}`
+
     formData.append(
       attachName,
       new Blob([item.buffer], { type: item.mimeType }),
       item.filename
     )
-      filename: item.filename,
-      contentType: item.mimeType
-    })
+
     mediaJson.push({
-      type: item.type, // 'photo' or 'video'
+      type: item.type,
       media: `attach://${attachName}`,
     })
   })
@@ -120,10 +116,12 @@ async function sendTelegramMediaGroup(botToken, chatId, mediaItems) {
     method: 'POST',
     body: formData,
   })
+
   const json = await res.json()
   if (!json.ok) {
     throw new Error(`Telegram sendMediaGroup error: ${json.description}`)
   }
+
   return json
 }
 
