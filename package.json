@@ -8,6 +8,7 @@
     "install:all": "cd frontend && npm install && cd ../netlify/functions && npm install"
   },
   "dependencies": {
-    "busboy": "^1.6.0"
+    "busboy": "^1.6.0",
+    "form-data": "^4.0.5"
   }
 }
