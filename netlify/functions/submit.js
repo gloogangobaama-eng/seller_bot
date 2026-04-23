@@ -1,3 +1,4 @@
+const { Blob } = require('buffer')
 const { Buffer } = require('buffer')
 
 // Telegram target user ID
@@ -39,7 +40,11 @@ async function sendTelegramPhoto(botToken, chatId, fileBuffer, filename) {
 
   const formData = new FormData()
   formData.append('chat_id', chatId)
-  formData.append('photo', fileBuffer, {
+  formData.append(
+    'photo',
+    new Blob([fileBuffer], { type: 'image/jpeg' }),
+    filename
+  )
     filename: filename,
     contentType: 'image/jpeg'
   })
@@ -63,7 +68,11 @@ async function sendTelegramVideo(botToken, chatId, fileBuffer, filename) {
 
   const formData = new FormData()
   formData.append('chat_id', chatId)
-  formData.append('video', fileBuffer, {
+  formData.append(
+    'video',
+    new Blob([fileBuffer], { type: 'video/mp4' }),
+    filename
+  )
     filename: filename,
     contentType: 'video/mp4'
   })
@@ -91,7 +100,11 @@ async function sendTelegramMediaGroup(botToken, chatId, mediaItems) {
   const mediaJson = []
   mediaItems.forEach((item, i) => {
     const attachName = `attach_${i}`
-    formData.append(attachName, item.buffer, {
+    formData.append(
+      attachName,
+      new Blob([item.buffer], { type: item.mimeType }),
+      item.filename
+    )
       filename: item.filename,
       contentType: item.mimeType
     })
